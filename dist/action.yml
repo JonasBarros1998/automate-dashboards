@@ -1,0 +1,6 @@
+name: 'automate dashboards' 
+description: 'A fast greeting action using name, place, and age.'
+runs:
+  using: "node20"
+  main: "dist/index.js"
+  

@@ -1,9 +1,4 @@
-- 1. EC2
-- 2. S3
-- 3. SQS
-  - [ ] 3.1 Available messages
-  - [ ] 3.2 Number of messages receiver
-  - [ ] 3.3 Number of messages sent
-  - [ ] 3.4 Messages in fligth
-- 4. SNS
-- 5. EC2
+1. [ ] EC2
+2. [ ] S3
+3. [ ] SQS
+4. [ ] SNS

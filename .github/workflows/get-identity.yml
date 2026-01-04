@@ -27,7 +27,6 @@ jobs:
       - name: Sts GetCallerIdentity
         run: |
           aws sts get-caller-identity
-      - name: Issue contents
-        uses: actions/automate-dashboards
-        with:
-          name: "DashboardsIA"
+
+      - name: create dash
+        uses: JonasBarros1998/dashboardsia-github-action@1.0.0
