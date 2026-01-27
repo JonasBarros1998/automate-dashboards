@@ -5,131 +5,68 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import { Root } from "remark-parse/lib";
 
-const markdown = `
-region AWS: us-east-1
-
-1. [ ] EC2 | name: ...
-2. [x] S3 | name: aws-cloudtrail-logs-700552527916-a0e3addd
-3. [x] SQS | name: lambda-sqs
-4. [x] SNS | name: my-topic-dashboards
-5. [x] Lambda | name: change-data-capture
-6. [x] Dynamodb | name: dashboard
-`;
+interface Dashboard {
+  start: "-PT1H",
+  widgets: Array<any>,
+}
 
 interface Issue {
-  title: string;
-  services: Array<{
-    serviceType: string;
-    checked: boolean;
-    serviceName: string;
-  }>;
+  region: string,
+  title: string,
+  services: {
+    enable: boolean,
+    serviceName: string,
+    serviceType: string
+  }[]  
 }
 
-interface Dashboard {
-  region: string;
-  serviceType: string;
-  checked: boolean;
-  serviceName: string;
-  body: string;
-}
-
-const regex = /^\s*\[x\]\s+.*$/i;
-
-function mocks() {
-  return {
-    number: 123,
-    title: "Create Dahsboard",
-    body: markdown,
-  };
-}
-
-function processMarkdown(tree: Root) {
-  const dashboards = {
-    title: "",
-    services: [],
-  } as Issue;
-
-  const [childrenTitle, childrenData] = tree.children as any;
-
-  const itens = childrenData["children"] as Array<any>;
-
-  itens.map((childrens) => {
-    const childrensFields = childrens["children"][0]["children"][0];
-    const [serviceType, service] = (childrensFields["value"] as string).split("|");
-    const isChecked = regex.test(serviceType);
-
-    //Remove spaces and atributte name
-    const serviceName = service?.replace(/name:|\s/g, "");
-
-    dashboards.services.push({
-      serviceType: serviceType.trimEnd(),
-      checked: isChecked,
-      serviceName,
-    });
-  });
-
-  const [, region] = childrenTitle["children"][0]["value"].split(":") as string;
-
-  dashboards.title = region.trimStart();
-
-  return dashboards;
+function processMarkdown(tree: Issue) {
+  const treeCopy = Object.assign(tree, {})
+  return treeCopy;
 }
 
 function createDash(data: Issue) {
-  const dashboard = [] as Array<Dashboard>;
-  const dashboard1 = {
+  const dashboard = {
     start: "-PT1H",
-    widgets: [],
-  } as { start: string; widgets: Array<any> };
+    widgets: []
+  } as Dashboard;
 
   data.services.map((service) => {
-    if (service.checked === true) {
+    if (service.enable === true) {
       switch (service.serviceType) {
-
-        case "[x] SQS":
-          dashboard1.widgets.push(
-            ...SQSService(data.title, service.serviceName)
-          );
+        case "SQS":
+          dashboard.widgets.push(...SQSService(data.region, service.serviceName))
           break;
 
-        case "[x] S3":
-          dashboard1.widgets.push(
-            ...S3Service(data.title, service.serviceName)
-          );
+        case "S3":
+          dashboard.widgets.push(...S3Service(data.region, service.serviceName))
           break;
 
-        case "[x] SNS": 
-          dashboard1.widgets.push(
-            ...SNSService(data.title, service.serviceName)
-          )
+        case "SNS": 
+          dashboard.widgets.push(...SNSService(data.region, service.serviceName))
           break;
 
-        case "[x] Lambda": 
-          dashboard1.widgets.push(
-            ...lambdaService(data.title, service.serviceName)
-          )
+        case "Lambda": 
+          dashboard.widgets.push(...lambdaService(data.region, service.serviceName))
           break;
         
-        case "[x] Dynamodb":
-          dashboard1.widgets.push(
-            ...dynamodbService(data.title, service.serviceName)
-          )
-
+        case "Dynamodb":
+          dashboard.widgets.push(...dynamodbService(data.region, service.serviceName))
         default:
           break;
       }
     }
   });
 
-  return dashboard1;
+  return JSON.stringify(dashboard);
 }
 
-function execute(dashboard: string) {
+function execute(dashboard: string, dashboardTitle: string) {
   cli.exec("aws", [
     "cloudwatch",
     "put-dashboard",
     "--dashboard-name",
-    "my-dashboard",
+    dashboardTitle,
     "--dashboard-body",
     dashboard,
   ]);
@@ -635,17 +572,29 @@ function dynamodbService(region: string, serviceName: string) {
   ]
 }
 
-async function run() {
-  //const issue = github.context.payload.issue
-  const issue = mocks();
+export const loadDatas = (body: string, title: string) => {
 
-  if (issue?.title === "Create Dahsboard") {
-    const tree = unified().use(remarkParse).parse(issue?.body);
+  Object.defineProperty(github.context.payload, "issue", {
+      value: {
+        title: "Create Dashboard",
+        body: body
+      },
+      writable: false
+    }
+  )
+}
+
+async function run() {
+  const issue = github.context.payload.issue
+  
+  if (issue?.title === "Create Dashboard") {
+    const tree = JSON.parse(issue?.body!!) as Issue;
 
     const terraformData = processMarkdown(tree);
     const dashboard = createDash(terraformData);
-    execute(JSON.stringify(dashboard));
-    //console.log(JSON.stringify(dashboard));
+    console.log(terraformData.title)
+
+    execute(dashboard, terraformData.title);
     return;
   }
 
@@ -654,6 +603,6 @@ async function run() {
   );
 }
 
-(() => {
-  run();
-})();
+export const quickStart = {
+  "run": run
+}
