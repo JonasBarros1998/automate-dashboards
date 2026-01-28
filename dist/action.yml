@@ -1,6 +1,10 @@
 name: 'automate dashboards' 
 description: 'A fast greeting action using name, place, and age.'
+
+branding:
+  icon: "zap"
+  color: "purple"
+
 runs:
   using: "node20"
   main: "dist/index.js"
-  
