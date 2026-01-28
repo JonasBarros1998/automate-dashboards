@@ -36,7 +36,7 @@ function mocks() {
 
 function starter() {
   const mock = mocks()
-  action.loadDatas(JSON.stringify(mock), mock.title)
+  action.loadDatas(JSON.stringify(mock))
   action.quickStart.run()
 }
 

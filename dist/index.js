@@ -31806,7 +31806,7 @@ function dynamodbService(region, serviceName) {
         }
     ];
 }
-const loadDatas = (body, title) => {
+const loadDatas = (body) => {
     Object.defineProperty(github.context.payload, "issue", {
         value: {
             title: "Create Dashboard",
@@ -31816,13 +31816,14 @@ const loadDatas = (body, title) => {
     });
 };
 exports.loadDatas = loadDatas;
-async function run() {
+function run() {
+    core.info("payload" + github.context.payload.issue);
     const issue = github.context.payload.issue;
     if ((issue === null || issue === void 0 ? void 0 : issue.title) === "Create Dashboard") {
         const tree = JSON.parse(issue === null || issue === void 0 ? void 0 : issue.body);
         const terraformData = processMarkdown(tree);
         const dashboard = createDash(terraformData);
-        console.log(terraformData.title);
+        core.info("title" + terraformData.title);
         execute(dashboard, terraformData.title);
         return;
     }

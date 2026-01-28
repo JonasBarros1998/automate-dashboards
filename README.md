@@ -12,6 +12,7 @@ Getting started is easy, you need to open a github issue and select the services
 - SNS
 - Lambda
 - Dynamodb
+
 **This repository is frequently updated, also in the future new features will be added to the action in the future**
 
 ## Quick start

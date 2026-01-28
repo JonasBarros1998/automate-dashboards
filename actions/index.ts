@@ -1,9 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import * as cli from "@actions/exec";
-import { unified } from "unified";
-import remarkParse from "remark-parse";
-import { Root } from "remark-parse/lib";
 
 interface Dashboard {
   start: "-PT1H",
@@ -62,6 +59,7 @@ function createDash(data: Issue) {
 }
 
 function execute(dashboard: string, dashboardTitle: string) {
+
   cli.exec("aws", [
     "cloudwatch",
     "put-dashboard",
@@ -572,7 +570,7 @@ function dynamodbService(region: string, serviceName: string) {
   ]
 }
 
-export const loadDatas = (body: string, title: string) => {
+export const loadDatas = (body: string) => {
 
   Object.defineProperty(github.context.payload, "issue", {
       value: {
@@ -584,7 +582,9 @@ export const loadDatas = (body: string, title: string) => {
   )
 }
 
-async function run() {
+function run() {
+  core.info("payload" + github.context.payload.issue);
+
   const issue = github.context.payload.issue
   
   if (issue?.title === "Create Dashboard") {
@@ -592,7 +592,7 @@ async function run() {
 
     const terraformData = processMarkdown(tree);
     const dashboard = createDash(terraformData);
-    console.log(terraformData.title)
+    core.info("title" + terraformData.title)
 
     execute(dashboard, terraformData.title);
     return;
