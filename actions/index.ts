@@ -583,7 +583,7 @@ export const loadDatas = (body: string) => {
 }
 
 function run() {
-  core.info("payload" + github.context.payload.issue);
+  core.info("payload" + JSON.stringify(github.context.payload.issue));
 
   const issue = github.context.payload.issue
   
