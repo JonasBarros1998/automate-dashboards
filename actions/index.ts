@@ -603,6 +603,8 @@ function run() {
   );
 }
 
+(() => run())();
+
 export const quickStart = {
   "run": run
 }
