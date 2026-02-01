@@ -618,7 +618,7 @@ function run() {
   );
 }
 
-//(() => run())();
+(() => run())();
 
 export const quickStart = {
   "run": run
