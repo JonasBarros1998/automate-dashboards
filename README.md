@@ -21,10 +21,10 @@ Getting started is easy, you need to open a github issue and select the services
 
     ```yaml
       name: create dashboard
-      uses: JonasBarros1998/dashboardsia-github-action@latest
+      uses: JonasBarros1998/automate-dashboards@1.5.4
     ```
 
-2. Navigate to github repository and create a new issue. The title of the issue must be "Create Dashboards" and you need to add this JSON template below into the description field.  
+2. Navigate to github repository and create a new issue. The title of the issue must be "Create Dashboard" and you need to add this JSON template below into the description field.  
 
     ```json
       {
@@ -63,7 +63,7 @@ Getting started is easy, you need to open a github issue and select the services
   
 4. Click the **create** button to create the issue and trigger your GitHub workflow.
 
-## Configuring your AWS account to allow the action to create the new dashboards
+## Configuring your AWS account to allow the action creating the new dashboards
 
 To use this action, you must create an IAM role and IAM policy. Follow the steps below to create these resources in your AWS account.  
 
@@ -89,10 +89,10 @@ To use this action, you must create an IAM role and IAM policy. Follow the steps
 7. Click the **Add Provider** button
 
 8. The image below shows the completed OIDC Provider
-    ![alt text](image-1.png)
+    ![alt text](doc/image-1.png)
 
 9. After clicking the **Add Provider** button you will be redirected to the **Identity providers** list and your provider is ready to use.
-   ![alt text](image-2.png)
+   ![alt text](doc/image-2.png)
 
 10. Navigate to your provider and copy the ARN. We will use the ARN in step **12. Creating an IAM Role**. Your ARN should looks like the example below
 
@@ -118,8 +118,8 @@ To use this action, you must create an IAM role and IAM policy. Follow the steps
 
     9. The images below, show the complete AWS Policy
 
-      ![alt text](image-4.png)
-      ![alt text](image-5.png)
+      ![alt text](doc/image-4.png)
+      ![alt text](doc/image-5.png)
 
 12. Creating and attachment the policy in AWS IAM Role
 
@@ -135,13 +135,7 @@ To use this action, you must create an IAM role and IAM policy. Follow the steps
 
     6. Enter your github organization name or username in the **Github organization** field
 
-    7. Enter `repo:USERNAME_or_GITHUB_ORGANIZATION/REPOSITORY_NAME` in the **Github repository** field.
-
-        Replace **USER_NAME_or_GITHUB_ORGANIZATION** with your actual github username or organization name and **REPOSITORY_NAME** with your repository name.
-
-        Once updated, the value should looks like the example below
-    Github repository: `repo:Mark1234/my-dash-repository:*`.
-        And then click **Next**
+    7. Enter your repository name in the **Github repository** field. And then click **Next**
 
     8. In the **Add permissions** section, search for and select the policy name you created earlier and click **Next**
 
@@ -154,7 +148,7 @@ To use this action, you must create an IAM role and IAM policy. Follow the steps
     12. Copy the **ARN** of the IAM role you just created
 
     13. The image below, shows a successfully completed AWS role
-      ![alt text](image-3.png)
+      ![alt text](doc/image-3.png)
 
     14. Click the "Trust relationships" tab. The content should look like the example below:
 
@@ -174,8 +168,8 @@ To use this action, you must create an IAM role and IAM policy. Follow the steps
                 },
                   "StringLike": {
                     "token.actions.githubusercontent.com:sub": [
-                        "repo:JonasBarros1998/repo:JonasBarros1998/dashboardsia-github-action:*",
-                        "repo:JonasBarros1998/repo:JonasBarros1998/dashboardsia-github-action:*"
+                        "repo:JonasBarros1998/emotional_analisys:*",
+                        "repo:JonasBarros1998/emotional_analisys:*"
                       ]
                   }
               }
@@ -186,11 +180,11 @@ To use this action, you must create an IAM role and IAM policy. Follow the steps
 
 13. Navigate to github action and import the Role ARN. Your action should look like the example below
 
-  ```yaml
-  - name: configure aws credentials
-    uses: aws-actions/configure-aws-credentials@v1.7.0 # import the action
-    with:
-      role-to-assume: arn:aws:iam::000111222333:role/dashboards-devops-gitrhub-action # role ARN
-      role-session-name: GitHub_to_AWS_via_FederatedOIDC # Create a session role name
-        aws-region: ${{ env.AWS_REGION }} # set the region name
-        ```
+    ```yaml
+    - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        with:
+          role-to-assume: arn:aws:iam::700552527916:role/to_enable_creating_dashbaords
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+    ```
