@@ -58,16 +58,31 @@ function createDash(data: Issue) {
   return JSON.stringify(dashboard);
 }
 
-function execute(dashboard: string, dashboardTitle: string) {
+async function execute(dashboard: string, dashboardTitle: string) {
+  const stderr: Array<string> = [] 
 
-  cli.exec("aws", [
-    "cloudwatch",
-    "put-dashboard",
-    "--dashboard-name",
-    dashboardTitle,
-    "--dashboard-body",
-    dashboard,
-  ]);
+  await cli.exec(
+    "aws", 
+    [
+      "cloudwatch",
+      "put-dashboard",
+      "--dashboard-name",
+      dashboardTitle,
+      "--dashboard-body",
+      dashboard,
+    ],
+    {
+      silent: true,
+      ignoreReturnCode: true,
+      listeners: {
+        stderr: (data: Buffer) => {
+          stderr.push(data.toString().trim())
+        },
+      },
+    }
+)
+  core.error(`It's not possible to create the dashboard ${dashboardTitle}`)
+  core.error(stderr[0])
 }
 
 function SQSService(region: string, serviceName: string) {
@@ -583,16 +598,16 @@ export const loadDatas = (body: string) => {
 }
 
 function run() {
-  core.info("payload" + JSON.stringify(github.context.payload.issue));
-
   const issue = github.context.payload.issue
+
+  console.log(JSON.stringify(issue))
   
   if (issue?.title === "Create Dashboard") {
     const tree = JSON.parse(issue?.body!!) as Issue;
 
     const terraformData = processMarkdown(tree);
     const dashboard = createDash(terraformData);
-    core.info("title" + terraformData.title)
+    core.info("title: " + terraformData.title)
 
     execute(dashboard, terraformData.title);
     return;
@@ -603,7 +618,7 @@ function run() {
   );
 }
 
-(() => run())();
+//(() => run())();
 
 export const quickStart = {
   "run": run

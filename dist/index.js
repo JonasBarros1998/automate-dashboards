@@ -31303,15 +31303,26 @@ function createDash(data) {
     });
     return JSON.stringify(dashboard);
 }
-function execute(dashboard, dashboardTitle) {
-    cli.exec("aws", [
+async function execute(dashboard, dashboardTitle) {
+    const stderr = [];
+    await cli.exec("aws", [
         "cloudwatch",
         "put-dashboard",
         "--dashboard-name",
         dashboardTitle,
         "--dashboard-body",
         dashboard,
-    ]);
+    ], {
+        silent: true,
+        ignoreReturnCode: true,
+        listeners: {
+            stderr: (data) => {
+                stderr.push(data.toString().trim());
+            },
+        },
+    });
+    core.error(`It's not possible to create the dashboard ${dashboardTitle}`);
+    core.error(stderr[0]);
 }
 function SQSService(region, serviceName) {
     return [
@@ -31817,19 +31828,19 @@ const loadDatas = (body) => {
 };
 exports.loadDatas = loadDatas;
 function run() {
-    core.info("payload" + github.context.payload.issue);
     const issue = github.context.payload.issue;
+    console.log(JSON.stringify(issue));
     if ((issue === null || issue === void 0 ? void 0 : issue.title) === "Create Dashboard") {
         const tree = JSON.parse(issue === null || issue === void 0 ? void 0 : issue.body);
         const terraformData = processMarkdown(tree);
         const dashboard = createDash(terraformData);
-        core.info("title" + terraformData.title);
+        core.info("title: " + terraformData.title);
         execute(dashboard, terraformData.title);
         return;
     }
     core.info("An issue was opened, but it's not for dashboard creation. Skipping this workflow.");
 }
-(() => run())();
+//(() => run())();
 exports.quickStart = {
     "run": run
 };
