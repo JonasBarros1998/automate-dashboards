@@ -31829,7 +31829,6 @@ const loadDatas = (body) => {
 exports.loadDatas = loadDatas;
 function run() {
     const issue = github.context.payload.issue;
-    console.log(JSON.stringify(issue));
     if ((issue === null || issue === void 0 ? void 0 : issue.title) === "Create Dashboard") {
         const tree = JSON.parse(issue === null || issue === void 0 ? void 0 : issue.body);
         const terraformData = processMarkdown(tree);

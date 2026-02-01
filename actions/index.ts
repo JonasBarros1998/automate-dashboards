@@ -599,8 +599,6 @@ export const loadDatas = (body: string) => {
 
 function run() {
   const issue = github.context.payload.issue
-
-  console.log(JSON.stringify(issue))
   
   if (issue?.title === "Create Dashboard") {
     const tree = JSON.parse(issue?.body!!) as Issue;
