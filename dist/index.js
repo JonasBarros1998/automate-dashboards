@@ -31840,7 +31840,7 @@ function run() {
     }
     core.info("An issue was opened, but it's not for dashboard creation. Skipping this workflow.");
 }
-//(() => run())();
+(() => run())();
 exports.quickStart = {
     "run": run
 };
