@@ -61,7 +61,7 @@ function createDash(data: Issue) {
 async function execute(dashboard: string, dashboardTitle: string) {
   const stderr: Array<string> = [] 
 
-  await cli.exec(
+  const command = await cli.exec(
     "aws", 
     [
       "cloudwatch",
@@ -81,8 +81,12 @@ async function execute(dashboard: string, dashboardTitle: string) {
       },
     }
 )
-  core.error(`It's not possible to create the dashboard ${dashboardTitle}`)
-  core.error(stderr[0])
+  
+  if(command !== 0) {
+    core.error(`It's not possible to create the dashboard ${dashboardTitle}`)
+    core.error(stderr[0])
+  }
+
 }
 
 function SQSService(region: string, serviceName: string) {
@@ -605,7 +609,6 @@ function run() {
 
     const terraformData = processMarkdown(tree);
     const dashboard = createDash(terraformData);
-    core.info("title: " + terraformData.title)
 
     execute(dashboard, terraformData.title);
     return;
@@ -616,7 +619,7 @@ function run() {
   );
 }
 
-(() => run())();
+//(() => run())();
 
 export const quickStart = {
   "run": run
