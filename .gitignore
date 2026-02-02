@@ -1,6 +1,6 @@
 actions/node_modules
 actions/dist/node_modules
 src/package-lock.json
-essential-scripts/*
+scripts/*
 actions/package-lock.json
 dist-dev
