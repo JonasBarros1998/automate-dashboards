@@ -1,4 +1,4 @@
-# Automation creation dashboards
+# Automate AWS CloudWatch dashboards with Github Actions
 
 This action will automate the creation dashboards of the most popular AWS services.
 
