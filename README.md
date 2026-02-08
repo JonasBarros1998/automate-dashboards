@@ -22,8 +22,31 @@ Getting started is easy, you need to open a github issue and select the services
 1. Navigate to your github workflow and include the action below
 
     ```yaml
-      name: create dashboard
-      uses: JonasBarros1998/automate-dashboards@1.5.8
+      name: Connect to an AWS role from a GitHub repository
+
+      on:
+        issues:
+          types: [opened]
+
+      env:
+        AWS_REGION: "REGION_NAME"
+
+      permissions:
+        id-token: write
+        contents: read
+
+      jobs:
+        AssumeRoleAndCallIdentity:
+          runs-on: ubuntu-latest
+          steps:
+            - name: configure aws credentials
+              uses: aws-actions/configure-aws-credentials@v1.7.0
+              with:
+                role-to-assume: ROLE_NAME
+                role-session-name: GitHub_to_AWS_via_FederatedOIDC
+                aws-region: ${{ env.AWS_REGION }}
+            - name: create dash
+              uses: "JonasBarros1998/automate-dashboards@1.5.8"
     ```
 
 2. Navigate to github repository and create a new issue. The title of the issue must be "Create Dashboard" and you need to add this JSON template below into the description field.  
