@@ -95,7 +95,75 @@ To use this action, you must create an IAM role and IAM policy. Follow the steps
 **Prerequisites:**
 
 1. In your project you must use github actions.
-2. Your user must have permissions to create an **OpenID Connect IDP**, **policies**, and **roles** in your AWS account
+2. Your user must have permissions to create an **OpenID Connect IDP**, **policies**, and **roles** in your AWS account.
+3. The next steps you can to create with the [AWS CLI](#create-oidc-provider-policy-and-roles-with-aws-cli) or the [Console AWS](#creating-an-oidc-provider-in-your-aws-account)
+
+### Create OIDC provider, policy and roles with AWS CLI
+
+1. To create the **Open ID Connect**
+
+    ```sh
+    aws iam create-open-id-connect-provider --url "https://token.actions.githubusercontent.com" --client-id-list "sts.amazonaws.com"
+    ```
+
+2. Copy the content below and save a json file the content below to your local computer with file name `policyForGithubAction.json`
+
+    ```json
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+              "Sid": "VisualEditor0",
+              "Effect": "Allow",
+              "Action": "cloudwatch:PutDashboard",
+              "Resource": "arn:aws:cloudwatch::ADD_YOUR_AWS_ACCOUNT_ID:dashboard/*"
+          }
+        ]
+      }
+    ```
+
+3. Execute the command below to create a IAM policy
+
+    ```sh
+    aws iam create-policy --policy-name policyForGithubAction --policy-document file://policyForGithubAction.json --description "A custom policy to grant put dashboards cloud watch"
+    ```
+
+4. Save a json file the content below to your local computer with file name `trustPolicyRoleForGithubAction.json`
+
+    ```json
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": {
+                    "Federated": "arn:aws:iam::ADD_YOUR_AWS_ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
+                },
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                    "StringEquals": {
+                        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                    },
+                    "StringLike": {
+                        "token.actions.githubusercontent.com:sub": [
+                            "repo:ADD_USERNAME_OR_ORGANIZATION_GITHUB_NAME/ADD_YOUR_REPOSITORY_NAME:*",
+                        ]
+                    }
+                }
+            }
+        ]
+      }
+    ```
+
+5. Execute the commands below to create a IAM Role and attach the policy
+  
+    ```sh
+      aws iam create-role --role-name assumeRoleForGithubAction --assume-role-policy-document file://trustPolicyRoleForGithubAction.json
+    ```
+
+    ```sh
+      aws iam attach-role-policy --role-name assumeRoleForGithubAction --policy-arn arn:aws:iam::ADD_YOUR_AWS_ACCOUNT_ID:policy/policyForGithubAction
+    ```
 
 ### Creating an OIDC Provider in your AWS Account
 
@@ -123,7 +191,7 @@ To use this action, you must create an IAM role and IAM policy. Follow the steps
 
     **Example**: arn:aws:iam::000000000000:oidc-provider/token.actions.githubusercontent.com
 
-11. Create an IAM Policy
+11. Using the console AWS to create the IAM Policy
 
     1. Open the IAM Console
 
