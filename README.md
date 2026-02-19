@@ -47,7 +47,7 @@ Getting started is easy, you need to open a github issue and select the services
                 role-session-name: GitHub_to_AWS_via_FederatedOIDC
                 aws-region: ${{ env.AWS_REGION }}
             - name: create dash
-              uses: "JonasBarros1998/automate-dashboards@1.5.8"
+              uses: "JonasBarros1998/automate-dashboards@1.6.0"
     ```
 
 2. Navigate to github repository and create a new issue. The title of the issue must be "Create Dashboard" and you need to add this JSON template below into the description field.  
