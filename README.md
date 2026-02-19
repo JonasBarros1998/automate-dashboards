@@ -14,6 +14,7 @@ Getting started is easy, you need to open a github issue and select the services
 - SNS
 - Lambda
 - Dynamodb
+- EC2
 
 **This repository is frequently updated, also in the future new features will be added to the action in the future**
 
@@ -81,6 +82,26 @@ Getting started is easy, you need to open a github issue and select the services
             "enable": true,
             "serviceName": "my-sqs-queue",
             "serviceType": "SQS"
+          },
+          {
+            "enable": true,
+            "serviceName": "my-topic-dashboards",
+            "serviceType": "SNS"
+          },
+          {
+            "enable": true,
+            "serviceName": "change-data-capture",
+            "serviceType": "Lambda"
+          },
+          {
+            "enable": true,
+            "serviceName": "dashboard",
+            "serviceType": "Dynamodb"
+          },
+          {
+            "enable": true,
+            "serviceName": "i-0567abcdca1000ddd", // to add your instance-id
+            "serviceType": "EC2"
           }
         ]
       }

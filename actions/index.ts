@@ -49,6 +49,12 @@ function createDash(data: Issue) {
         
         case "Dynamodb":
           dashboard.widgets.push(...dynamodbService(data.region, service.serviceName))
+          break;
+        
+        case "EC2":
+          dashboard.widgets.push(...EC2Services(data.region, service.serviceName))
+          break;
+
         default:
           break;
       }
@@ -72,8 +78,8 @@ async function execute(dashboard: string, dashboardTitle: string) {
       dashboard,
     ],
     {
-      silent: true,
-      ignoreReturnCode: true,
+      //silent: true,
+      //ignoreReturnCode: true,
       listeners: {
         stderr: (data: Buffer) => {
           stderr.push(data.toString().trim())
@@ -563,7 +569,6 @@ function dynamodbService(region: string, serviceName: string) {
         view :"timeSeries"
       },
     },
-    
     {
       type: "metric",
       x: 0,
@@ -584,8 +589,157 @@ function dynamodbService(region: string, serviceName: string) {
         region: region,
         view :"timeSeries"
       },
+    } 
+  ]
+}
+
+function EC2Services(region: string, serviceName: string) {
+  return [
+    {
+      type: "metric",
+      x: 0,
+      y: 30,
+      width: 24,
+      height: 6,
+      properties: {
+        view: "timeSeries",
+        stat: "Average",
+        period: 300,
+        stacked: false,
+        region: region,
+        title: "CPU utilization (%)",
+        yAxis: {
+          left: { 
+            "min": 0 
+          }
+        },
+        metrics: [
+          [
+            "AWS/EC2",
+            "CPUUtilization",
+            "InstanceId",
+            serviceName,
+            {
+              label: serviceName,
+              region: region,
+              id: "m1"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      x: 12,
+      y: 36,
+      width: 12,
+      height: 6,
+      type: "metric",
+      properties: {
+        title: "Network in (bytes)",
+        view: "timeSeries",
+        stat: "Average",
+        period: 300,
+        stacked: false,
+        region: region,
+        metrics: [
+          [ 
+            "AWS/EC2", 
+            "NetworkIn", 
+            "InstanceId", 
+            serviceName, 
+            { 
+              "label": serviceName,
+              "region": region,
+              "id": "m1" 
+            }
+          ]
+        ],
+      } 
+    },
+    {
+      x: 0,
+      y: 36,
+      width: 12,
+      height: 6,
+      type: "metric",
+      properties: {
+        title: "Network out (bytes)",
+        view: "timeSeries",
+        stat: "Average",
+        period: 300,
+        stacked: false,
+        region: region,
+        metrics: [
+          [ 
+            "AWS/EC2", 
+            "NetworkOut", 
+            "InstanceId", 
+            serviceName, 
+            { 
+              "label": serviceName,
+              "region": region,
+              "id": "m1"
+            }
+          ]
+        ],
+      }
+    },
+    {
+      type: "metric",
+      x: 12,
+      y: 42,
+      width: 12,
+      height: 6,
+      properties: {
+        title: "Network packets in (count)",
+        view: "timeSeries",
+        stat: "Average",
+        period: 300,
+        stacked: false,
+        region: region,
+        metrics: [
+          [ 
+            "AWS/EC2",
+            "NetworkPacketsIn",
+            "InstanceId",
+            serviceName, 
+            { 
+              label: serviceName,
+              region: region,
+              id: "m1" 
+            } 
+          ]
+        ],
+      }
+    },
+    {
+      type: "metric",
+      x: 0,
+      y: 42,
+      width: 12,
+      height: 6,
+      properties: {
+        title: "Network out (bytes)",
+        view: "timeSeries",
+        stat: "Average",
+        period: 300,
+        stacked: false,
+        region: region,
+        metrics: [
+          [
+            "AWS/EC2",
+            "NetworkOut",
+            "InstanceId",
+            serviceName,
+            { 
+              label: serviceName,
+              region: region,
+              id: "m1"
+            }
+          ]
+        ],
+      }
     }
-      
   ]
 }
 
