@@ -127,7 +127,7 @@ To use this action, you must create an IAM role and IAM policy. Follow the steps
     aws iam create-open-id-connect-provider --url "https://token.actions.githubusercontent.com" --client-id-list "sts.amazonaws.com"
     ```
 
-2. Copy the content below and save a json file the content below to your local computer with file name `policyForGithubAction.json`
+2. Copy the content below and save a json file to your local computer with the name `policyForGithubAction.json`
 
     ```json
       {
