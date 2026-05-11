@@ -318,10 +318,12 @@ function run() {
   }
 }
 
+/* ================== Invoke function to start action ==================== */
+
 (() => run())();
 
 export const quickStart = {
   "run": run
 }
 
-/* ================== Invoke function to start action ==================== */
+
