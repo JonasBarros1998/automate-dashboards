@@ -29,6 +29,11 @@ function mocks() {
         enable: true,
         serviceName: "dashboard",
         serviceType: "Dynamodb"
+      },
+      {
+        enable: true,
+        serviceName: "i-06e79e74c4657bf85",
+        serviceType: "EC2"
       }
     ],
   };
