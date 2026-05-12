@@ -309,9 +309,7 @@ export const loadDatas = (body: string) => {
 /* ================= RUN ================= */
 
 function run() {
-  core.info("invoke run function: ")
   const issue = github.context.payload.issue;
-  core.info("issue: " + issue)
 
   if (issue?.title === "Create Dashboard") {
     const data = JSON.parse(issue.body as string) as Issue;

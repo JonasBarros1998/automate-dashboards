@@ -31508,6 +31508,8 @@ function run() {
         execute(dashboard, data.title);
     }
 }
+/* ================== Invoke function to start action ==================== */
+(() => run())();
 exports.quickStart = {
     "run": run
 };
