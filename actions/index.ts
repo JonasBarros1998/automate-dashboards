@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import * as cli from "@actions/exec";
-import { start } from "node:repl";
+import { createAlarms } from "./alarms";
 
 /* ================= TYPES ================= */
 
@@ -10,15 +10,31 @@ interface Dashboard {
   widgets: any[];
 }
 
-interface Issue {
+export interface Alarms {
+  metric: string,
+  period: number,
+  statistic: "Sum" | "Average",
+  condition: "GreaterThanThreshold" | "GreaterThanOrEqualToThreshold" | "LessThanOrEqualToThreshold" | "LessThanLowerThreshold",
+  threshold: number,
+  name: string,
+  namespace: string | null;
+}
+
+export interface Issue {
   region: string;
   title: string;
-  services: {
-    enable: boolean;
-    serviceName: string;
-    serviceType: string;
-  }[];
+  services: Services[];
 }
+
+export interface Services {
+  enable: boolean;
+  serviceName: string;
+  serviceType: string;
+  alarms: Alarms[]
+}
+
+export const availableServices = ["SQS", "SNS", "EC2", "Dynamodb", "Lambda", "S3"]
+
 
 /* ================= LAYOUT ENGINE ================= */
 
@@ -313,8 +329,9 @@ function run() {
 
   if (issue?.title === "Create Dashboard") {
     const data = JSON.parse(issue.body as string) as Issue;
-    const dashboard = createDash(data);
-    execute(dashboard, data.title);
+
+    createAlarms(data)
+    execute(createDash(data), data.title);
   }
 }
 
