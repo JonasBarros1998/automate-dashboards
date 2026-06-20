@@ -66,8 +66,7 @@ function validateCondition(service: Services) {
 export async function execute(arg: {alarm: Alarms}) {
     const stderr: string[] = [];
 
-    console.log("ACTION_NAME: ", core.getInput("ACTION_NAME", {required: true}))
-    console.log("ACTION_NAME_V2: ", core.getInput("ACTION_NAME_V2", {required: true}))
+    console.log("ACTION_NAME: ", process.env.ACTION_NAME)
 
     const code = await cli.exec(
     "aws",
@@ -103,7 +102,7 @@ export async function execute(arg: {alarm: Alarms}) {
         arg.alarm.namespace!!,
         
         "--ok-actions",
-        core.getInput("ACTION_NAME", {required: true})
+        process.env.ACTION_NAME as string
     ],
     {
         listeners: {

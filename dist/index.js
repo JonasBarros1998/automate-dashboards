@@ -31323,8 +31323,7 @@ function validateCondition(service) {
 /* ================== EXEC ================= */
 async function execute(arg) {
     const stderr = [];
-    console.log("ACTION_NAME: ", core.getInput("ACTION_NAME", { required: true }));
-    console.log("ACTION_NAME_V2: ", core.getInput("ACTION_NAME_V2", { required: true }));
+    console.log("ACTION_NAME: ", process.env.ACTION_NAME);
     const code = await cli.exec("aws", [
         "cloudwatch",
         "put-metric-alarm",
@@ -31347,7 +31346,7 @@ async function execute(arg) {
         "--namespace",
         arg.alarm.namespace,
         "--ok-actions",
-        core.getInput("ACTION_NAME", { required: true })
+        process.env.ACTION_NAME
     ], {
         listeners: {
             stderr: (data) => stderr.push(data.toString()),
