@@ -66,8 +66,6 @@ function validateCondition(service: Services) {
 export async function execute(arg: {alarm: Alarms}) {
     const stderr: string[] = [];
 
-    console.log("ACTION_NAME: ", process.env.ACTION_NAME)
-
     const code = await cli.exec(
     "aws",
     [
