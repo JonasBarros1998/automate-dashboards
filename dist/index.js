@@ -31227,6 +31227,140 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 5645:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createAlarms = createAlarms;
+exports.execute = execute;
+const _1 = __nccwpck_require__(4177);
+const cli = __importStar(__nccwpck_require__(1514));
+const core = __importStar(__nccwpck_require__(2186));
+const EVALUATION_PERIODS = 5;
+const DATA_POINTS_TO_ALARMS = 3;
+const ENABLE_CONDITIONS = ["GreaterThanThreshold", "LessThanOrEqualToThreshold", "GreaterThanOrEqualToThreshold", "LessThanLowerThreshold"];
+/* ================= ALARMS BUILDER ================= */
+function createAlarms(issue) {
+    const filterAlarms = issue
+        .services
+        .filter(item => { var _a; return item.alarms !== null && ((_a = item.alarms) === null || _a === void 0 ? void 0 : _a.length) > 0; });
+    if (thereIsAlarms(filterAlarms)) {
+        filterAlarms
+            .filter(item => _1.availableServices.includes(item.serviceType))
+            .map(service => validateCondition(service))
+            .map(async (service) => {
+            await execute({
+                alarm: addParams({
+                    alarmItem: addNamespace(service),
+                    service: service
+                })
+            });
+        });
+    }
+}
+function addParams(arg) {
+    arg.alarmItem = addNamespace(arg.service);
+    arg.alarmItem = addName(arg.alarmItem, arg.service);
+    return arg.alarmItem;
+}
+const thereIsAlarms = (service) => service.flatMap(item => item.alarms).length > 0;
+function addNamespace(service) {
+    return service
+        .alarms
+        .map(alarm => ({ ...alarm, namespace: `AWS/${service.serviceType.toUpperCase()}` }))[0];
+}
+function addName(alarmItem, service) {
+    return { ...alarmItem, "name": `${alarmItem.metric}-${service.serviceName}` };
+}
+function validateCondition(service) {
+    service
+        .alarms
+        .flatMap(item => item.condition)
+        .map(name => {
+        if (ENABLE_CONDITIONS.includes(name) === false) {
+            const messageError = `The condition name is invalid. These conditions are available ${ENABLE_CONDITIONS.join(",")}`;
+            core.setFailed(messageError);
+            throw (messageError);
+        }
+    });
+    return service;
+}
+/* ================== EXEC ================= */
+async function execute(arg) {
+    const stderr = [];
+    console.log("ACTION_NAME: ", process.env.ACTION_NAME);
+    const code = await cli.exec("aws", [
+        "cloudwatch",
+        "put-metric-alarm",
+        "--alarm-name",
+        arg.alarm.name,
+        "--metric-name",
+        arg.alarm.metric,
+        "--period",
+        arg.alarm.period.toString(),
+        "--evaluation-periods",
+        EVALUATION_PERIODS.toString(),
+        "--datapoints-to-alarm",
+        DATA_POINTS_TO_ALARMS.toString(),
+        "--threshold",
+        arg.alarm.threshold.toString(),
+        "--statistic",
+        arg.alarm.statistic,
+        "--comparison-operator",
+        arg.alarm.condition,
+        "--namespace",
+        arg.alarm.namespace,
+        "--ok-actions",
+        process.env.ACTION_NAME
+    ], {
+        listeners: {
+            stderr: (data) => stderr.push(data.toString()),
+        },
+    });
+    if (code !== 0) {
+        core.error(stderr.join("\n"));
+        throw Error(`Dont possible create ${arg.alarm.name}`);
+    }
+}
+
+
+/***/ }),
+
 /***/ 4177:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -31266,10 +31400,12 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.quickStart = exports.loadDatas = void 0;
+exports.quickStart = exports.loadDatas = exports.availableServices = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const cli = __importStar(__nccwpck_require__(1514));
+const alarms_1 = __nccwpck_require__(5645);
+exports.availableServices = ["SQS", "SNS", "EC2", "Dynamodb", "Lambda", "S3"];
 /* ================= LAYOUT ENGINE ================= */
 const GRID_WIDTH = 24;
 const SPACING = 2;
@@ -31504,8 +31640,8 @@ function run() {
     const issue = github.context.payload.issue;
     if ((issue === null || issue === void 0 ? void 0 : issue.title) === "Create Dashboard") {
         const data = JSON.parse(issue.body);
-        const dashboard = createDash(data);
-        execute(dashboard, data.title);
+        (0, alarms_1.createAlarms)(data);
+        execute(createDash(data), data.title);
     }
 }
 /* ================== Invoke function to start action ==================== */
